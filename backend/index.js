@@ -47,7 +47,7 @@ app.post('/api/applications', upload.single('receipt'), async (req, res) => {
     const newApp = await pool.query(
       `INSERT INTO applications (team_name, num_members, department, leader_name, leader_phone, leader_national_id, leader_email, members, receipt_url) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [team_name, num_members, department, leader_name, leader_phone, leader_national_id, leader_email, members ? JSON.parse(members) : null, receipt_url]
+      [team_name, num_members, department, leader_name, leader_phone, leader_national_id, leader_email, members || null, receipt_url]
     );
 
     res.status(201).json(newApp.rows[0]);
@@ -94,43 +94,66 @@ app.put('/api/applications/:id/status', async (req, res) => {
   }
 });
 
-// 4. Import Data from Excel (Admin)
-app.post('/api/applications/import', upload.single('file'), async (req, res) => {
+// 4. Export Data to Excel (Admin)
+app.get('/api/applications/export', async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
+    const allApps = await pool.query('SELECT * FROM applications ORDER BY created_at DESC');
 
-    const workbook = xlsx.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
-    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const excelData = allApps.rows.map(app => {
+      const baseData = {
+        'ID': app.id,
+        'Team Name': app.team_name,
+        'Members Count': app.num_members,
+        'Department': app.department,
+        'Status': app.status,
+        'Leader Name': app.leader_name,
+        'Leader Phone': app.leader_phone,
+        'Leader National ID': app.leader_national_id,
+        'Leader Email': app.leader_email,
+        'Submission Date': new Date(app.created_at).toLocaleString()
+      };
 
-    for (let row of data) {
-      // Basic mapping - assuming columns match exact names
-      // In production, validation and more robust mapping is needed
-      await pool.query(
-        `INSERT INTO applications (team_name, num_members, department, leader_name, leader_phone, leader_national_id, leader_email, status) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [
-          row.team_name,
-          row.num_members || 1,
-          row.department,
-          row.leader_name,
-          row.leader_phone,
-          row.leader_national_id,
-          row.leader_email,
-          row.status || 'pending'
-        ]
-      );
-    }
+      // Ensure consistent columns by initializing slots for up to 4 additional members (since max team size is 5)
+      for (let i = 0; i < 4; i++) {
+        const mId = i + 1;
+        baseData[`Member ${mId} Name`] = '';
+        baseData[`Member ${mId} Phone`] = '';
+        baseData[`Member ${mId} National ID`] = '';
+        baseData[`Member ${mId} Email`] = '';
+      }
 
-    // Delete the file after processing
-    fs.unlinkSync(req.file.path);
+      if (app.members) {
+         try {
+           const membersArr = typeof app.members === 'string' ? JSON.parse(app.members) : app.members;
+           if (Array.isArray(membersArr)) {
+             membersArr.forEach((m, idx) => {
+               if (idx < 4) { // Up to 4 additional members
+                 const mId = idx + 1;
+                 baseData[`Member ${mId} Name`] = m.name || '';
+                 baseData[`Member ${mId} Phone`] = m.phone || '';
+                 baseData[`Member ${mId} National ID`] = m.national_id || '';
+                 baseData[`Member ${mId} Email`] = m.email || '';
+               }
+             });
+           }
+         } catch(e) {}
+      }
 
-    res.json({ message: 'Data imported successfully', count: data.length });
+      return baseData;
+    });
+
+    const worksheet = xlsx.utils.json_to_sheet(excelData);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Applications');
+
+    const buffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    res.setHeader('Content-Disposition', 'attachment; filename="applications.xlsx"');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.send(buffer);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: 'Server error during import' });
+    res.status(500).json({ error: 'Server error during export' });
   }
 });
 
