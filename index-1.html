@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoCup Registration</title>
+<style>
+body {font-family: Arial; background:#0f172a; color:white; padding:20px;}
+.container {max-width:800px; margin:auto;}
+input, select {width:100%; padding:10px; margin:10px 0; border-radius:8px; border:none;}
+.card {background:#1e293b; padding:20px; border-radius:15px; margin-top:20px;}
+button {background:#22c55e; border:none; padding:15px; width:100%; border-radius:10px; font-size:18px; cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>RoCup</h1>
+<p>Welcome to our humble Team. We hope you enjoy our company</p>
+
+<div class="card">
+<h2>Team Info</h2>
+<input type="text" placeholder="Team Name" required>
+<select id="members" onchange="generateMembers()">
+<option value="">Number of Members</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+</select>
+<input type="text" placeholder="Department">
+</div>
+
+<div class="card">
+<h2>Team Leader</h2>
+<input type="text" placeholder="Name">
+<input type="text" placeholder="Phone Number">
+<input type="text" placeholder="National ID">
+<input type="email" placeholder="Email">
+</div>
+
+<div id="membersContainer"></div>
+
+<div class="card">
+<h2>Upload Payment Receipt (100 EGP)</h2>
+<input type="file">
+</div>
+
+<button>Submit</button>
+</div>
+
+<script>
+function generateMembers() {
+  let container = document.getElementById("membersContainer");
+  container.innerHTML = "";
+  let count = document.getElementById("members").value;
+
+  for (let i = 1; i < count; i++) {
+    container.innerHTML += `
+    <div class="card">
+      <h2>Member ${i}</h2>
+      <input type="text" placeholder="Name">
+      <input type="text" placeholder="Phone Number">
+      <input type="text" placeholder="National ID">
+      <input type="email" placeholder="Email">
+    </div>
+    `;
+  }
+}
+</script>
+</body>
+</html>
