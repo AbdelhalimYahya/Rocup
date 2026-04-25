@@ -34,7 +34,7 @@ function App() {
       formData.set('members', JSON.stringify(members));
 
       // Append to the actual API
-      await axios.post('http://localhost:5000/api/applications', formData, {
+      await axios.post('https://api.swiftly-app.cloud/api/applications', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -13,7 +13,7 @@ function App() {
   const fetchApplications = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:5000/api/applications');
+      const res = await axios.get('https://api.swiftly-app.cloud/api/applications');
       setApplications(res.data);
       setError("");
     } catch (err) {
@@ -29,7 +29,7 @@ function App() {
 
   const handleStatusChange = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/applications/${id}/status`, { status });
+      await axios.put(`https://api.swiftly-app.cloud/api/applications/${id}/status`, { status });
       fetchApplications();
       if (selectedApp && selectedApp.id === id) {
         setSelectedApp(prev => ({ ...prev, status }));
@@ -42,7 +42,7 @@ function App() {
   const handleExportExcel = async () => {
     try {
       setImporting(true); // Reusing importing state for loading
-      const res = await axios.get('http://localhost:5000/api/applications/export', { responseType: 'blob' });
+      const res = await axios.get('https://api.swiftly-app.cloud/api/applications/export', { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -205,7 +205,7 @@ function App() {
                       <td className="p-4 text-center">
                         {app.receipt_url ? (
                           <a 
-                            href={`http://localhost:5000${app.receipt_url}`} 
+                            href={`https://api.swiftly-app.cloud${app.receipt_url}`} 
                             target="_blank" 
                             rel="noreferrer"
                             className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-sm"
@@ -336,7 +336,7 @@ function App() {
                   <div>
                     <p className="text-sm text-slate-400">Receipt</p>
                     <a 
-                      href={`http://localhost:5000${selectedApp.receipt_url}`} 
+                      href={`https://api.swiftly-app.cloud${selectedApp.receipt_url}`} 
                       target="_blank" 
                       rel="noreferrer"
                       className="text-cyan-400 hover:underline inline-flex items-center gap-1 font-medium"
