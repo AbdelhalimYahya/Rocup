@@ -137,7 +137,7 @@ function App() {
           <div className="bg-slate-800/80 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-2xl border border-slate-700/50">
             <h2 className="text-2xl font-semibold mb-6 text-emerald-400 flex items-center gap-2">
               <span className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-sm">★</span>
-              Upload Payment Receipt (100 EGP)
+              Upload Payment Receipt (150 EGP) on this number 01033626931 (Ahmed Damarany)
             </h2>
             <div className="relative">
               <input type="file" name="receipt" required className="block w-full text-sm text-slate-400 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-500/10 file:text-emerald-400 hover:file:bg-emerald-500/20 file:transition-colors cursor-pointer border border-slate-700 rounded-2xl p-2 bg-slate-900/50" />
